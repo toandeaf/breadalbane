@@ -13,6 +13,7 @@ class Calculator extends Component {
 
     constructor(props) {
         super(props);
+        console.log("Constructing.");
         this.sums = {
             asset: 0,
             tradeIn: 0,
@@ -21,14 +22,37 @@ class Calculator extends Component {
             monthly: 0,
             monthly_lower: 0,
             monthly_higher: 0,
+            rate_lower: 3.0,
+            rate_higher: 5.0,
         }
+
         this.calculate = this.calculate.bind(this);
+
+        this.fetchRates().then(rates => {
+            if (rates != null) {
+                this.sums.rate_lower = rates[0];
+                this.sums.rate_higher = rates[1];
+            } else {
+                this.sums.rate_lower = 3.0;
+                this.sums.rate_higher = 5.0;
+                console.log("Defaulting Rates.");
+            }
+        });
+    }
+
+    async fetchRates() {
+        return await fetch('http://localhost:8080/api/rates').then(response => {
+                return response.json();
+            }).catch(() => {
+                console.error("ahhh");
+                return null;
+        });
     }
 
     calculate() {
         let advance = this.sums.asset - (+this.sums.deposit + +this.sums.tradeIn);
-        let percentOfAdvanceHigher = advance * 0.05;
-        let percentOfAdvanceLower = advance * 0.03;
+        let percentOfAdvanceHigher = advance * (this.sums.rate_higher / 100);
+        let percentOfAdvanceLower = advance * (this.sums.rate_lower / 100);
         let month = this.sums.term / 12;
         let monthly_higher = percentOfAdvanceHigher * month;
         let monthly_lower = percentOfAdvanceLower * month;
@@ -45,13 +69,10 @@ class Calculator extends Component {
 
     render() {
         return (
-            <div className="Component">
-                <div className="col-md-12">
+            <div className="Calculator">
+                <div >
                     <div className="section-title">
-                        <h2>Get your Financing Quote</h2>
-                        <p>
-                            If would like a monthly quotation estimate, please enter the following details below:
-                        </p>
+                        <h2>Generate Finance Quote</h2>
                     </div>
                     <Box display={"flex"}>
                         <Grid container spacing={4}>
@@ -138,14 +159,12 @@ class Calculator extends Component {
                                                    position="start">£</InputAdornment>
                                            }}/>
                             </Grid>
-                            <Grid item xs={12} xm={6} xl={4}></Grid>
+                            <Grid item xs={12} xm={6} xl={4}>
+                                <TextField onClick={this.fetchRates} fullWidth id="reference" label={"Inquiry Reference"} variant={"outlined"}/>
+                            </Grid>
+                            <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/savedQuote">Save Quote</Button></Grid>
+                            <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Request Contact</Button></Grid>
                         </Grid>
-                    </Box>
-                </div>
-                <div className="container">
-                    <Box>
-                        <Grid item xs={12} xm={6} xl={4}><Button href="#/savedQuote">Save Quote</Button></Grid>
-                        <Grid item xs={12} xm={6} xl={4}><Button href="#/requestContact">Request Contact</Button></Grid>
                     </Box>
                 </div>
             </div>

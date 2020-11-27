@@ -6,18 +6,19 @@
   background: white;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.Header {
+  padding-top: 25px;
 }
 
-.Component {
-  margin-left: 25px;
-  margin-right: 25px;
-  margin-bottom: 25px;
+.Calculator {
+  padding-left: 50px;
+  padding-right: 50px;
 }
 
-.Button {
-  background-color: green;
+.Table {
+  padding-left: 50px;
+  padding-right: 50px;
 }
-
+.content {
+  padding-bottom: 50px;
+}
