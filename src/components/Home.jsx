@@ -10,7 +10,7 @@ class Home extends Component {
         return (
             <Grid container>
                 <Grid item xs={12} xm={12} xl={12}>
-                    <h1>Active Inquiries</h1>
+                    <h1>Active Quotes</h1>
                 </Grid>
                 <Grid item xs={1} xm={2} xl={4}></Grid>
                 <Grid item xs={10} xm={12} xl={12} >

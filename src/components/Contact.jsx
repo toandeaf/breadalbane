@@ -44,13 +44,13 @@ class Contact extends Component {
                                     <option aria-label="None" value={"Uncertain"}>Uncertain</option>
                                     <option value={"Tempted"}>Unimpressed with Quote Range</option>
                                     <option value={"Keen"}>Tempted with Quote Range</option>
-                                    <option value={"Accepted Quote"}>Happy with Quote Range</option>
+                                    <option value={"Accepted GenQuote"}>Happy with Quote Range</option>
                                 </Select>
                             </Grid>
                             <Grid item xs={12} xm={6} xl={4}>
                                 <Typography>Note: Contact Request will automatically include Quote Information</Typography>
                             </Grid>
-                            <Grid item xs={6} xm={6} xl={6}><Button className="Button" fullWidth href="#/savedQuote">Save Quote</Button></Grid>
+                            <Grid item xs={6} xm={6} xl={6}><Button className="Button" fullWidth href="#/generateQuote">Return to Quote</Button></Grid>
                             <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Submit Contact Request</Button></Grid>
                         </Grid>
                     </Box>

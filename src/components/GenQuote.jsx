@@ -9,12 +9,12 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Button from "@material-ui/core/Button";
 
-class Calculator extends Component {
+class GenQuote extends Component {
 
     constructor(props) {
         super(props);
-        console.log("Constructing.");
-        this.sums = {
+        this.quote = {
+            reference: "",
             asset: 0,
             tradeIn: 0,
             deposit: 0,
@@ -27,50 +27,78 @@ class Calculator extends Component {
         }
 
         this.calculate = this.calculate.bind(this);
+        this.saveQuote = this.saveQuote.bind(this);
 
-        this.fetchRates().then(rates => {
-            if (rates != null) {
-                this.sums.rate_lower = rates[0];
-                this.sums.rate_higher = rates[1];
+        this.fetchRates().then(quote => {
+            if (quote != null) {
+                this.quote.rate_lower = quote.rate.lowerRate;
+                this.quote.rate_higher = quote.rate.higherRate;
+                console.log("Fetched Rates.");
             } else {
-                this.sums.rate_lower = 3.0;
-                this.sums.rate_higher = 5.0;
+                this.quote.rate_lower = 3.0;
+                this.quote.rate_higher = 5.0;
                 console.log("Defaulting Rates.");
             }
         });
     }
 
     async fetchRates() {
-        return await fetch('http://localhost:8080/api/rates').then(response => {
-                return response.json();
-            }).catch(() => {
-                console.error("ahhh");
-                return null;
+        return await fetch('http://localhost:8181/api/quote/example').then(response => {
+            return response.json();
+        }).catch(() => {
+            console.error("ahhh");
+            return null;
         });
     }
 
+    async saveQuote() {
+
+        console.log(this.quote);
+        const requestOptions = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(
+                {
+                    reference: this.quote.reference,
+                    asset: this.quote.asset,
+                    tradeIn: this.quote.tradeIn,
+                    term: this.quote.term,
+                    deposit: this.quote.deposit,
+                    rate : {
+                        lowerRate: this.quote.rate_lower,
+                        higherRate: this.quote.rate_higher
+                    },
+                    monthly: this.quote.monthly
+                }
+            )
+        };
+
+        console.log(requestOptions);
+        return await fetch('http://localhost:8181/api/quote/create' ,requestOptions)
+    }
+
     calculate() {
-        let advance = this.sums.asset - (+this.sums.deposit + +this.sums.tradeIn);
-        let percentOfAdvanceHigher = advance * (this.sums.rate_higher / 100);
-        let percentOfAdvanceLower = advance * (this.sums.rate_lower / 100);
-        let month = this.sums.term / 12;
+        let advance = this.quote.asset - (+this.quote.deposit + +this.quote.tradeIn);
+        let percentOfAdvanceHigher = advance * (this.quote.rate_higher / 100);
+        let percentOfAdvanceLower = advance * (this.quote.rate_lower / 100);
+        let month = this.quote.term / 12;
         let monthly_higher = percentOfAdvanceHigher * month;
         let monthly_lower = percentOfAdvanceLower * month;
 
-        if(monthly_lower > 0) {
+        if (monthly_lower > 0) {
             let monthly = (monthly_lower.toFixed(2) + " - " + monthly_higher.toFixed(2));
-            this.sums.monthly = monthly;
+            this.quote.monthly = monthly;
         } else {
-            this.sums.monthly = "0 (Deposit or Trade in Value exceeds Total Asset Cost)";
+            this.quote.monthly = "0 (Deposit or Trade in Value exceeds Total Asset Cost)";
         }
 
-        this.setState(this.sums);
+        this.setState(this.quote);
     }
 
     render() {
         return (
             <div className="Calculator">
-                <div >
+                <div>
                     <div className="section-title">
                         <h2>Generate Finance Quote</h2>
                     </div>
@@ -80,7 +108,7 @@ class Calculator extends Component {
                                 <TextField fullWidth id="number-basic" type="number"
                                            label={"Asset Cost exc. VAT"}
                                            onChange={e => {
-                                               this.sums.asset = e.target.value;
+                                               this.quote.asset = e.target.value;
                                                this.calculate();
                                            }}
                                            variant={"outlined"} InputProps={{
@@ -90,7 +118,7 @@ class Calculator extends Component {
                             <Grid item xs={12} xm={6} xl={4}>
                                 <TextField fullWidth id="number-basic" type="number" label={"Deposit"}
                                            onChange={e => {
-                                               this.sums.deposit = e.target.value;
+                                               this.quote.deposit = e.target.value;
                                                this.calculate();
                                            }}
                                            variant={"outlined"} InputProps={{
@@ -101,7 +129,7 @@ class Calculator extends Component {
                                 <TextField fullWidth id="number-basic" type="number"
                                            label={"Trade In Value (inc. VAT)"} variant={"outlined"}
                                            onChange={e => {
-                                               this.sums.tradeIn = e.target.value;
+                                               this.quote.tradeIn = e.target.value;
                                                this.calculate();
                                            }}
                                            InputProps={{
@@ -121,7 +149,7 @@ class Calculator extends Component {
                                             id: 'age-native-simple',
                                         }}
                                         onChange={e => {
-                                            this.sums.term = e.target.value;
+                                            this.quote.term = e.target.value;
                                             this.calculate();
                                         }}
                                 >
@@ -153,17 +181,24 @@ class Calculator extends Component {
                             <Grid item xs={12} xm={6} xl={4}>
                                 <TextField fullWidth id="estimated"
                                            label={"Estimated Monthly Repayments"}
-                                           value={this.sums.monthly} variant={"outlined"}
+                                           value={this.quote.monthly} variant={"outlined"}
                                            InputProps={{
                                                startAdornment: <InputAdornment
                                                    position="start">£</InputAdornment>
                                            }}/>
                             </Grid>
                             <Grid item xs={12} xm={6} xl={4}>
-                                <TextField onClick={this.fetchRates} fullWidth id="reference" label={"Inquiry Reference"} variant={"outlined"}/>
+                                <TextField onClick={this.fetchRates} fullWidth id="reference"
+                                           label={"GenQuote Reference"} variant={"outlined"} onChange={e => {
+                                    this.quote.reference = e.target.value;
+                                }}/>
                             </Grid>
-                            <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/savedQuote">Save Quote</Button></Grid>
-                            <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Request Contact</Button></Grid>
+                            {/*<Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/savedQuote">Save*/}
+                            {/*    GenQuote</Button></Grid>*/}
+                            <Grid item xs={6} xm={6} xl={6}><Button onClick={this.saveQuote}>Save
+                                Quote</Button></Grid>
+                            <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Save Quote and Request
+                                Contact</Button></Grid>
                         </Grid>
                     </Box>
                 </div>
@@ -172,4 +207,4 @@ class Calculator extends Component {
     }
 }
 
-export default Calculator;
+export default GenQuote;

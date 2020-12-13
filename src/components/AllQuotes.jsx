@@ -3,12 +3,12 @@ import Grid from "@material-ui/core/Grid";
 import {Table, TableBody, TableHead, TableRow} from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 
-class Saved extends Component {
+class AllQuotes extends Component {
     render() {
         return (
             <Grid container>
                 <Grid item xs={12} xm={12} xl={12}>
-                    <h1>All Saved Inquiries</h1>
+                    <h1>All Saved Quotes</h1>
                 </Grid>
                 <Grid item xs={1} xm={2} xl={4}></Grid>
                 <Grid item xs={10} xm={12} xl={12} >
@@ -75,4 +75,4 @@ class Saved extends Component {
     }
 }
 
-export default Saved;
+export default AllQuotes;
