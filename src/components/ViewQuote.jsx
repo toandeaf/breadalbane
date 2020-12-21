@@ -40,10 +40,10 @@ class ViewQuote extends Component {
     }
 
     async refreshQuote() {
-        return await fetch('http://localhost:8181/api/quote/example').then(response => {
+        return await fetch(server + '/api/quote/example').then(response => {
             return response.json();
         }).catch(() => {
-            console.error("ahhh");
+            console.error("Issue pulling rates.");
             return null;
         });
     }
@@ -116,8 +116,6 @@ class ViewQuote extends Component {
                             </Grid>
 
                             <Grid item xs={12} xm={6} xl={4}>
-                                {/*<TextField id="number-basic" type="number" label={"Balloon"}  variant={"outlined"} InputProps={{*/}
-                                {/*    startAdornment: <InputAdornment position="start">£</InputAdornment>}}/>*/}
                                 <Typography id="discrete-slider" gutterBottom>
                                     Balloon %
                                 </Typography>
@@ -131,6 +129,7 @@ class ViewQuote extends Component {
                                     max={20}
                                 />
                             </Grid>
+
                             <Grid item xs={12} xm={6} xl={4}>
                                 <TextField fullWidth id="estimated"
                                            label={"Estimated Monthly Repayments"}
@@ -142,12 +141,10 @@ class ViewQuote extends Component {
                             </Grid>
                             <Grid item xs={12} xm={6} xl={4}>
                                 <TextField onClick={this.refreshQuote} fullWidth id="reference"
-                                           label={"GenQuote Reference"} variant={"outlined"} onChange={e => {
+                                           label={"NewQuote Reference"} variant={"outlined"} onChange={e => {
                                     this.quote.reference = e.target.value;
                                 }}/>
                             </Grid>
-                            {/*<Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/savedQuote">Save*/}
-                            {/*    GenQuote</Button></Grid>*/}
                             <Grid item xs={6} xm={6} xl={6}><Button onClick={this.saveQuote}>Save
                                 Quote</Button></Grid>
                             <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Save Quote and Request

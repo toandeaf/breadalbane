@@ -9,8 +9,9 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Button from "@material-ui/core/Button";
 
-export const GenQuote = () => {
+export const NewQuote = () => {
 
+    const server = 'http://192.168.0.155:8181';
     const [quote, updateQuote] = useState({
         reference: "",
         asset: 0,
@@ -42,7 +43,7 @@ export const GenQuote = () => {
     }, [quote]);
 
     async function fetchRates() {
-        return await fetch('http://localhost:8181/api/quote/example').then(response => {
+        return await fetch(server + '/api/quote/example').then(response => {
             return response.json();
         }).catch(() => {
             console.error("ahhh");
@@ -51,28 +52,42 @@ export const GenQuote = () => {
     }
 
     async function saveQuote() {
-        console.log(quote);
-        const requestOptions = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(
-                {
-                    reference: quote.reference,
-                    asset: quote.asset,
-                    tradeIn: quote.tradeIn,
-                    term: quote.term,
-                    deposit: quote.deposit,
-                    rate: {
-                        lowerRate: quote.rate_lower,
-                        higherRate: quote.rate_higher
-                    },
-                    monthly: monthly
-                }
-            )
-        };
+        if (monthly === 0 || monthly == "0 (Deposit or Trade in Value exceeds Total Asset Cost)") {
+            alert("Cannot save incomplete quote request.");
+            return;
+        } else {
+            const requestOptions = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(
+                    {
+                        reference: quote.reference,
+                        asset: quote.asset,
+                        tradeIn: quote.tradeIn,
+                        term: quote.term,
+                        deposit: quote.deposit,
+                        rate: {
+                            lowerRate: quote.rate_lower,
+                            higherRate: quote.rate_higher
+                        },
+                        monthly: monthly
+                    }
+                )
+            };
 
-        console.log(requestOptions);
-        return await fetch('http://localhost:8181/api/quote/create', requestOptions)
+            await fetch(server + '/api/quote/create', requestOptions).then(response => {
+                if (response.status > 300) {
+                    alert("Issue saving quote.");
+                } else {
+                    alert("Quote saved.");
+                }
+            }).catch(error => {
+                console.error(error);
+                alert("Issue saving quote. Server problem.");
+            })
+
+
+        }
     }
 
     function calculate() {
@@ -150,7 +165,6 @@ export const GenQuote = () => {
                                         calculate();
                                     }}
                             >
-                                <option aria-label="None" value=""/>
                                 <option value={12}>12</option>
                                 <option value={24}>24</option>
                                 <option value={36}>36</option>
@@ -190,11 +204,9 @@ export const GenQuote = () => {
                                 quote.reference = e.target.value;
                             }}/>
                         </Grid>
-                        <Grid item xs={6} xm={6} xl={6}><Button onClick={saveQuote}>Save
+                        <Grid item xs={6} xm={6} xl={6}><Button variant="outlined" fullWidth onClick={saveQuote}>Save
                             Quote</Button></Grid>
-                        <Grid item xs={6} xm={6} xl={6}><Button fullWidth href="#/requestContact">Save Quote and
-                            Request
-                            Contact</Button></Grid>
+                        <Grid item xs={6} xm={6} xl={6}><Button variant="outlined" fullWidth to="#/requestContact">Push Quote</Button></Grid>
                     </Grid>
                 </Box>
             </div>
@@ -204,4 +216,4 @@ export const GenQuote = () => {
 }
 
 
-export default GenQuote;
+export default NewQuote;
