@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
@@ -6,10 +6,14 @@ import Button from "@material-ui/core/Button";
 import {Typography} from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
+import {QuoteContext} from "./QuoteContext";
 
 export const Contact = () => {
 
     const server = 'http://192.168.0.155:8181';
+
+    const [quote] = useContext(QuoteContext)
+
     const [capture] = useState({
         name: "",
         email: "",
@@ -38,6 +42,10 @@ export const Contact = () => {
             <div>
                 <div className="section-title">
                     <h2>Request Contact</h2>
+                    { quote != null &&
+                    <h2>{quote.monthly} </h2>
+
+                    }
                 </div>
                 <Box display={"flex"}>
                     <Grid container spacing={4}>

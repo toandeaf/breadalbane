@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Grid from "@material-ui/core/Grid";
 import {Table, TableBody, TableHead, TableRow} from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Moment from "moment";
+import {QuoteContext} from "./QuoteContext";
 
 export const Home = () => {
 
@@ -61,7 +62,6 @@ export const Home = () => {
                                 <TableCell>
                                     { Moment(quote.createdDate).format('h:mma - d/MM/y')}
                                 </TableCell>
-                                {/*<TableCell>{quote.quoteStatus}</TableCell>*/}
                             </TableRow>)) }
                     </TableBody>
                 </Table>

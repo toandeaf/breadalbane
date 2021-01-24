@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import TextField from "@material-ui/core/TextField";
@@ -8,22 +8,14 @@ import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Button from "@material-ui/core/Button";
+import {QuoteContext} from "./QuoteContext";
 
 export const NewQuote = () => {
 
     const server = 'http://192.168.0.155:8181';
-    const [quote, updateQuote] = useState({
-        reference: "",
-        asset: 0,
-        tradeIn: 0,
-        deposit: 0,
-        term: 12,
-        monthly: 0,
-        monthly_lower: 0,
-        monthly_higher: 0,
-        rate_lower: 3.0,
-        rate_higher: 5.0,
-    });
+
+    const [quote, setQuote] = useContext(QuoteContext)
+
     const [monthly, updateMonthly] = useState(0);
 
     useEffect(() => {
@@ -32,15 +24,15 @@ export const NewQuote = () => {
                 quote.rate_lower = data.rate.lowerRate;
                 quote.rate_higher = data.rate.higherRate;
                 console.log("Fetched Rates.");
-                updateQuote(quote);
+                setQuote(quote);
             } else {
                 quote.rate_lower = 3.0;
                 quote.rate_higher = 5.0;
                 console.log("Defaulting Rates.");
-                updateQuote(quote);
+                setQuote(quote);
             }
         });
-    }, [quote]);
+    });
 
     async function fetchRates() {
         return await fetch(server + '/api/quote/example').then(response => {
@@ -52,7 +44,7 @@ export const NewQuote = () => {
     }
 
     async function saveQuote() {
-        if (monthly === 0 || monthly == "0 (Deposit or Trade in Value exceeds Total Asset Cost)") {
+        if (monthly === 0 || monthly === "0 (Deposit or Trade in Value exceeds Total Asset Cost)") {
             alert("Cannot save incomplete quote request.");
             return;
         } else {
@@ -85,8 +77,6 @@ export const NewQuote = () => {
                 console.error(error);
                 alert("Issue saving quote. Server problem.");
             })
-
-
         }
     }
 
@@ -117,28 +107,39 @@ export const NewQuote = () => {
                 <Box display={"flex"}>
                     <Grid container spacing={4}>
                         <Grid item xs={12} xm={6} xl={4}>
-                            <TextField fullWidth id="number-basic" type="number"
-                                       label={"Asset Cost exc. VAT"}
-                                       onChange={e => {
-                                           quote.asset = e.target.value;
-                                           calculate();
-                                       }}
-                                       variant={"outlined"} InputProps={{
+                            <TextField
+                                fullWidth
+                                value={quote.asset}
+                                id="number-basic"
+                                type="number"
+                                label={"Asset Cost exc. VAT"}
+                                onChange={e => {
+                                    quote.asset = e.target.value;
+                                    calculate();
+                                }}
+                                variant={"outlined"} InputProps={{
                                 startAdornment: <InputAdornment position="start">£</InputAdornment>
                             }}/>
                         </Grid>
                         <Grid item xs={12} xm={6} xl={4}>
-                            <TextField fullWidth id="number-basic" type="number" label={"Deposit"}
-                                       onChange={e => {
-                                           quote.deposit = e.target.value;
-                                           calculate();
-                                       }}
-                                       variant={"outlined"} InputProps={{
+                            <TextField
+                                fullWidth
+                                value={quote.deposit}
+                                id="number-basic"
+                                type="number"
+                                label={"Deposit"}
+                                onChange={e => {
+                                    quote.deposit = e.target.value;
+                                    calculate();
+                                }}
+                                variant={"outlined"} InputProps={{
                                 startAdornment: <InputAdornment position="start">£</InputAdornment>
                             }}/>
                         </Grid>
                         <Grid item xs={12} xm={6} xl={4}>
-                            <TextField fullWidth id="number-basic" type="number"
+                            <TextField fullWidth
+                                       value={quote.tradeIn}
+                                       id="number-basic" type="number"
                                        label={"Trade In Value (inc. VAT)"} variant={"outlined"}
                                        onChange={e => {
                                            quote.tradeIn = e.target.value;
@@ -154,7 +155,7 @@ export const NewQuote = () => {
                             {/*    startAdornment: <InputAdornment position="start">£</InputAdornment>}}/>*/}
                             <InputLabel htmlFor="age-native-simple">Term in Months</InputLabel>
                             <Select fullWidth
-                                    defaultValue={12}
+                                    value={quote.term}
                                     native
                                     inputProps={{
                                         name: 'age',
@@ -163,8 +164,7 @@ export const NewQuote = () => {
                                     onChange={e => {
                                         quote.term = e.target.value;
                                         calculate();
-                                    }}
-                            >
+                                    }}>
                                 <option value={12}>12</option>
                                 <option value={24}>24</option>
                                 <option value={36}>36</option>
@@ -180,11 +180,15 @@ export const NewQuote = () => {
                                 Balloon %
                             </Typography>
                             <Slider
-                                defaultValue={30}
+                                defaultValue={quote.balloon}
+                                key={quote.balloon}
                                 aria-labelledby="discrete-slider"
                                 valueLabelDisplay="auto"
-                                step={1}
                                 marks
+                                onChangeCommitted={(e, val) => {
+                                    quote.balloon = val;
+                                    calculate();
+                                }}
                                 min={0}
                                 max={20}
                             />
@@ -199,20 +203,20 @@ export const NewQuote = () => {
                                        }}/>
                         </Grid>
                         <Grid item xs={12} xm={6} xl={4}>
-                            <TextField onClick={fetchRates} fullWidth id="reference"
+                            <TextField fullWidth id="reference"
                                        label={"Quote Reference"} variant={"outlined"} onChange={e => {
                                 quote.reference = e.target.value;
                             }}/>
                         </Grid>
                         <Grid item xs={6} xm={6} xl={6}><Button variant="outlined" fullWidth onClick={saveQuote}>Save
                             Quote</Button></Grid>
-                        <Grid item xs={6} xm={6} xl={6}><Button variant="outlined" fullWidth to="#/requestContact">Push Quote</Button></Grid>
+                        <Grid item xs={6} xm={6} xl={6}><Button variant="outlined" fullWidth
+                                                                href="#/requestContact">Push Quote</Button></Grid>
                     </Grid>
                 </Box>
             </div>
         </div>
     );
-
 }
 
 
